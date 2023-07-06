@@ -1,0 +1,44 @@
+FRAME {
+
+SELECT {
+    RETICLE 1 { WIDTH = 28000; HEIGHT = 32000; } 
+}
+   
+SCRIBEWIDTH  = 200;
+SCRIBEHEIGHT = 200;
+
+# Allow for 200-wide items in exterior scribes
+OVERLAPX     = 100;
+OVERLAPY     = 100;
+ 
+ # Families for process control modules for each side
+ FAMILY cmos65_TOP    {}
+ FAMILY cmos65_BOTTOM { cmos65_TOP.OVERLAP = TRUE; }
+ FAMILY bicmos45_TOP  { cmos65_TOP.OVERLAP = TRUE;  cmos65_BOTTOM.OVERLAP = TRUE; }
+
+ # Families for crack stop patterns for each side
+ FAMILY cmos65_TOP_CRACK    {}
+ FAMILY cmos65_BOTTOM_CRACK {}
+ FAMILY bicmos45_TOP_CRACK  {}
+
+ ITEM cmos65_TOP_TEST    { FAMILY=cmos65_TOP;    XMAX=2000; YMAX=100; REPEAT=10; DATA=item.gds; } 
+ ITEM cmos65_BOTTOM_TEST { FAMILY=cmos65_BOTTOM; XMAX=2000; YMAX=100; REPEAT=10; DATA=item.gds; } 
+ ITEM bicmos45_TOP_TEST  { FAMILY=bicmos45_TOP;  XMAX=2000; YMAX=100; REPEAT=10; DATA=item.gds; } 
+
+ ITEM cmos65_TOP_CRACK_ITEM    { FAMILY = cmos65_TOP_CRACK;    XMAX=200; YMAX=200; REPEAT=20; DATA=crack_top.oas;    }
+ ITEM cmos65_BOTTOM_CRACK_ITEM { FAMILY = cmos65_BOTTOM_CRACK; XMAX=200; YMAX=200; REPEAT=20; DATA=crack_bottom.oas; }
+ ITEM bicmos45_TOP_CRACK_ITEM  { FAMILY = bicmos45_TOP_CRACK;  XMAX=200; YMAX=200; REPEAT=20; DATA=crack.oas;        }
+
+ # Reserve areas around corners for crack stop patterns
+ FORBIDDEN INTER { (HOR[ANY] + 100) && (VER[ANY] + 100); }
+ 
+ CONSTRAINT {
+  # Crack stop patterns will be spread out and non-overlapping, including between sides, since that's frame's default behavior.
+  # However, we want to align out process control modules so that we can verify proper wafer alignment:
+ 	cmos65_BOTTOM_TEST.CC = cmos65_TOP_TEST.CC ;
+ 	bicmos45_TOP_TEST.CC  = cmos65_TOP_TEST.CC ;
+ }
+ 
+ SPREAD { cmos65_TOP_TEST; }
+ SPREAD { cmos65_TOP_CRACK_ITEM; cmos65_BOTTOM_CRACK_ITEM; bicmos45_TOP_CRACK_ITEM; }
+}
